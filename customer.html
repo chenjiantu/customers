@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+        }
+
+        .header h1 {
+            color: #1f2937;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+        }
+
+        .search-bar {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 48px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            background: #f9fafb;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 18px;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .tag-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tag-filter {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: #f9fafb;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .tag-filter:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .tag-filter.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .employee-select {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .employee-select label {
+            font-weight: 600;
+            color: #1f2937;
+            min-width: 80px;
+        }
+
+        .employee-dropdown {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 16px;
+            background: #f9fafb;
+            transition: all 0.2s ease;
+        }
+
+        .employee-dropdown:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+        }
+
+        .assign-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .assign-button:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .assign-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .customer-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .customer-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9fafb;
+        }
+
+        .customer-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .customer-stats {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .select-all-section {
+            padding: 16px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .select-all-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .checkbox-input {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .checkbox-input.checked {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .checkbox-input.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 50px 60px 120px 120px 100px 120px 1fr 120px 100px;
+            gap: 16px;
+            padding: 16px 24px;
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .table-header-cell {
+            display: flex;
+            align-items: center;
+        }
+
+        .customer-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .customer-item {
+            display: grid;
+            grid-template-columns: 50px 60px 120px 120px 100px 120px 1fr 120px 100px;
+            gap: 16px;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f3f4f6;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            align-items: center;
+        }
+
+        .customer-item:hover:not(.disabled) {
+            background: #f9fafb;
+        }
+
+        .customer-item.selected {
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 4px solid #3b82f6;
+        }
+
+        .customer-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f9fafb;
+        }
+
+        .customer-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .customer-checkbox.checked {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .customer-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .customer-checkbox.disabled {
+            background: #f3f4f6;
+            border-color: #e5e7eb;
+            cursor: not-allowed;
+        }
+
+        .customer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .customer-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .customer-phone {
+            font-size: 14px;
+            color: #1f2937;
+        }
+
+        .customer-remark {
+            font-size: 14px;
+            color: #6b7280;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .customer-assigned {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .assigned-employee {
+            color: #3b82f6;
+        }
+
+        .unassigned {
+            color: #6b7280;
+        }
+
+        .customer-description {
+            font-size: 14px;
+            color: #6b7280;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .customer-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .customer-tag {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            color: white;
+        }
+
+        .tag-crm {
+            background: #f59e0b;
+        }
+
+        .tag-erp {
+            background: #10b981;
+        }
+
+        .tag-oa {
+            background: #3b82f6;
+        }
+
+        .tag-finance {
+            background: #8b5cf6;
+        }
+
+        .tag-hr {
+            background: #ef4444;
+        }
+
+        .tag-marketing {
+            background: #06b6d4;
+        }
+
+        .assign-count {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .assign-count.available {
+            color: #10b981;
+        }
+
+        .assign-count.full {
+            color: #ef4444;
+        }
+
+        .assign-status {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .status-available {
+            color: #10b981;
+        }
+
+        .status-full {
+            color: #ef4444;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        /* 移动端响应式 */
+        @media (max-width: 1200px) {
+            .table-header,
+            .customer-item {
+                grid-template-columns: 50px 60px 100px 100px 80px 100px 1fr 100px 80px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .employee-select {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .employee-select label {
+                min-width: auto;
+                margin-bottom: 8px;
+            }
+
+            .tag-filters {
+                justify-content: center;
+            }
+
+            .customer-header {
+                padding: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            /* 移动端隐藏部分列 */
+            .table-header,
+            .customer-item {
+                grid-template-columns: 40px 50px 100px 1fr 80px;
+                gap: 8px;
+                font-size: 12px;
+            }
+
+            .table-header .hide-mobile,
+            .customer-item .hide-mobile {
+                display: none;
+            }
+
+            .customer-tags {
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .customer-tag {
+                font-size: 10px;
+                padding: 1px 4px;
+            }
+        }
+
+        .hide-mobile {
+            /* 在移动端隐藏的列 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>客户管理系统</h1>
+            <p>智能分配客户，提升团队效率</p>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="controls">
+            <!-- 搜索栏 -->
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="搜索客户姓名、手机号或备注..." id="searchInput">
+            </div>
+
+            <!-- 产品标签筛选 -->
+            <div class="filter-section">
+                <div class="filter-title">产品分组筛选</div>
+                <div class="tag-filters">
+                    <div class="tag-filter active" data-tag="all">全部产品</div>
+                    <div class="tag-filter" data-tag="crm">CRM系统</div>
+                    <div class="tag-filter" data-tag="erp">ERP系统</div>
+                    <div class="tag-filter" data-tag="oa">OA办公</div>
+                    <div class="tag-filter" data-tag="finance">财务系统</div>
+                    <div class="tag-filter" data-tag="hr">HR系统</div>
+                    <div class="tag-filter" data-tag="marketing">营销系统</div>
+                </div>
+            </div>
+
+            <!-- 员工筛选 -->
+            <div class="filter-section">
+                <div class="filter-title">员工筛选</div>
+                <div class="tag-filters">
+                    <div class="tag-filter active" data-employee="all">全部员工</div>
+                    <div class="tag-filter" data-employee="unassigned">未分配</div>
+                    <div class="tag-filter" data-employee="张三 - 销售部">张三</div>
+                    <div class="tag-filter" data-employee="李四 - 客服部">李四</div>
+                    <div class="tag-filter" data-employee="王五 - 市场部">王五</div>
+                    <div class="tag-filter" data-employee="赵六 - 销售部">赵六</div>
+                    <div class="tag-filter" data-employee="钱七 - 客服部">钱七</div>
+                    <div class="tag-filter" data-employee="孙八 - 市场部">孙八</div>
+                </div>
+            </div>
+
+            <!-- 员工选择和分配 -->
+            <div class="employee-select">
+                <label for="employeeSelect">分配给员工：</label>
+                <select class="employee-dropdown" id="employeeSelect">
+                    <option value="">请选择员工</option>
+                    <option value="emp1">张三 - 销售部</option>
+                    <option value="emp2">李四 - 客服部</option>
+                    <option value="emp3">王五 - 市场部</option>
+                    <option value="emp4">赵六 - 销售部</option>
+                    <option value="emp5">钱七 - 客服部</option>
+                    <option value="emp6">孙八 - 市场部</option>
+                </select>
+                <button class="assign-button" id="assignButton" disabled>批量分配客户</button>
+            </div>
+        </div>
+
+        <!-- 客户列表 -->
+        <div class="customer-section">
+            <div class="customer-header">
+                <div class="customer-title">客户列表</div>
+                <div class="customer-stats">
+                    总计 <span id="totalCustomers">0</span> 个客户，可分配 <span id="availableCustomers">0</span> 个，已选择 <span id="selectedCustomers">0</span> 个
+                </div>
+            </div>
+            
+            <div class="select-all-section">
+                <div class="select-all-checkbox" onclick="toggleSelectAll()">
+                    <div class="checkbox-input" id="selectAllCheckbox"></div>
+                    <span>全选可分配客户</span>
+                </div>
+            </div>
+
+            <!-- 表头 -->
+            <div class="table-header">
+                <div class="table-header-cell">选择</div>
+                <div class="table-header-cell">头像</div>
+                <div class="table-header-cell">客户姓名</div>
+                <div class="table-header-cell">手机号</div>
+                <div class="table-header-cell hide-mobile">备注</div>
+                <div class="table-header-cell">添加人</div>
+                <div class="table-header-cell">描述/标签</div>
+                <div class="table-header-cell hide-mobile">产品标签</div>
+                <div class="table-header-cell">分配状态</div>
+            </div>
+
+            <div class="customer-list" id="customerList">
+                <!-- 客户列表将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知消息 -->
+    <div class="notification" id="notification">
+        <span id="notificationText"></span>
+    </div>
+
+    <script>
+        // 模拟客户数据
+        const customers = [
+            {
+                id: 1,
+                name: "张明华",
+                remark: "重点客户，需要特别关注",
+                phone: "138****1234",
+                tags: ["crm", "erp"],
+                description: "科技公司CEO，对数字化转型很感兴趣",
+                assignCount: 1,
+                assignedTo: "张三 - 销售部"
+            },
+            {
+                id: 2,
+                name: "李小红",
+                remark: "个人用户",
+                phone: "139****5678",
+                tags: ["oa"],
+                description: "小企业主，需要简单的办公系统",
+                assignCount: 0,
+                assignedTo: null
+            },
+            {
+                id: 3,
+                name: "王大强",
+                remark: "建筑行业客户",
+                phone: "136****9012",
+                tags: ["erp", "finance"],
+                description: "建筑集团财务总监，关注成本控制",
+                assignCount: 2,
+                assignedTo: "李四 - 客服部"
+            },
+            {
+                id: 4,
+                name: "陈美丽",
+                remark: "新注册用户",
+                phone: "135****3456",
+                tags: ["hr"],
+                description: "HR经理，寻找人力资源管理解决方案",
+                assignCount: 0,
+                assignedTo: null
+            },
+            {
+                id: 5,
+                name: "刘志强",
+                remark: "制造业客户",
+                phone: "137****7890",
+                tags: ["erp", "crm"],
+                description: "制造企业生产总监，需要生产管理系统",
+                assignCount: 1,
+                assignedTo: "王五 - 市场部"
+            },
+            {
+                id: 6,
+                name: "赵雅琪",
+                remark: "营销总监",
+                phone: "134****2345",
+                tags: ["marketing", "crm"],
+                description: "互联网公司营销总监，关注客户获取",
+                assignCount: 2,
+                assignedTo: "赵六 - 销售部"
+            },
+            {
+                id: 7,
+                name: "孙小明",
+                remark: "财务经理",
+                phone: "133****6789",
+                tags: ["finance"],
+                description: "上市公司财务经理，需要合规的财务系统",
+                assignCount: 1,
+                assignedTo: "钱七 - 客服部"
+            },
+            {
+                id: 8,
+                name: "周大伟",
+                remark: "IT总监",
+                phone: "132****0123",
+                tags: ["oa", "hr"],
+                description: "大型企业IT总监，推进数字化办公",
+                assignCount: 0,
+                assignedTo: null
+            }
+        ];
+
+        let selectedCustomers = new Set();
+        let currentFilter = 'all';
+        let searchTerm = '';
+        let filteredCustomers = [];
+        let currentEmployeeFilter = 'all';
+
+        // 标签颜色映射
+        const tagColors = {
+            crm: 'tag-crm',
+            erp: 'tag-erp',
+            oa: 'tag-oa',
+            finance: 'tag-finance',
+            hr: 'tag-hr',
+            marketing: 'tag-marketing'
+        };
+
+        // 标签中文映射
+        const tagLabels = {
+            crm: 'CRM',
+            erp: 'ERP',
+            oa: 'OA办公',
+            finance: '财务',
+            hr: 'HR',
+            marketing: '营销'
+        };
+
+        // 检查客户是否可以被分配
+        function canAssignCustomer(customer) {
+            return customer.assignCount < 2;
+        }
+
+        // 获取过滤后的客户列表
+        function getFilteredCustomers() {
+            return customers.filter(customer => {
+                const matchesFilter = currentFilter === 'all' || customer.tags.includes(currentFilter);
+                const matchesEmployee = currentEmployeeFilter === 'all' || 
+                    (currentEmployeeFilter === 'unassigned' && !customer.assignedTo) ||
+                    customer.assignedTo === currentEmployeeFilter;
+                const matchesSearch = searchTerm === '' || 
+                    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    customer.remark.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    customer.phone.includes(searchTerm);
+                return matchesFilter && matchesEmployee && matchesSearch;
+            });
+        }
+
+        // 渲染客户列表
+        function renderCustomers() {
+            filteredCustomers = getFilteredCustomers();
+            const list = document.getElementById('customerList');
+            
+            list.innerHTML = filteredCustomers.map(customer => {
+                const isAssignable = canAssignCustomer(customer);
+                const isSelected = selectedCustomers.has(customer.id);
+                
+                return `
+                <div class="customer-item ${isSelected ? 'selected' : ''} ${!isAssignable ? 'disabled' : ''}" 
+                     data-customer-id="${customer.id}" onclick="toggleCustomer(${customer.id})">
+                    <div class="customer-checkbox ${isSelected ? 'checked' : ''} ${!isAssignable ? 'disabled' : ''}"></div>
+                    <div class="customer-avatar">${customer.name.charAt(0)}</div>
+                    <div class="customer-name">${customer.name}</div>
+                    <div class="customer-phone">${customer.phone}</div>
+                    <div class="customer-remark hide-mobile">${customer.remark}</div>
+                    <div class="customer-assigned ${customer.assignedTo ? 'assigned-employee' : 'unassigned'}">
+                        ${customer.assignedTo || '未分配'}
+                    </div>
+                    <div class="customer-description">
+                        <div style="margin-bottom: 4px;">${customer.description}</div>
+                        <div class="customer-tags">
+                            ${customer.tags.map(tag => `
+                                <span class="customer-tag ${tagColors[tag]}">${tagLabels[tag]}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="customer-tags hide-mobile">
+                        ${customer.tags.map(tag => `
+                            <span class="customer-tag ${tagColors[tag]}">${tagLabels[tag]}</span>
+                        `).join('')}
+                    </div>
+                    <div class="assign-count ${isAssignable ? 'available' : 'full'}">
+                        <div>${customer.assignCount}/2次</div>
+                        <div class="assign-status ${isAssignable ? 'status-available' : 'status-full'}">
+                            ${isAssignable ? '可分配' : '已满额'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            }).join('');
+
+            updateStats();
+            updateSelectAllCheckbox();
+        }
+
+        // 切换客户选择状态
+        function toggleCustomer(customerId) {
+            const customer = customers.find(c => c.id === customerId);
+            if (!canAssignCustomer(customer)) {
+                return; // 不能分配的客户不允许选择
+            }
+
+            if (selectedCustomers.has(customerId)) {
+                selectedCustomers.delete(customerId);
+            } else {
+                selectedCustomers.add(customerId);
+            }
+            renderCustomers();
+            updateAssignButton();
+        }
+
+        // 全选/取消全选
+        function toggleSelectAll() {
+            const assignableCustomers = filteredCustomers.filter(customer => canAssignCustomer(customer));
+            const allAssignableSelected = assignableCustomers.every(customer => selectedCustomers.has(customer.id));
+            
+            if (allAssignableSelected) {
+                // 取消选择当前页面所有可分配客户
+                assignableCustomers.forEach(customer => {
+                    selectedCustomers.delete(customer.id);
+                });
+            } else {
+                // 选择当前页面所有可分配客户
+                assignableCustomers.forEach(customer => {
+                    selectedCustomers.add(customer.id);
+                });
+            }
+            
+            renderCustomers();
+            updateAssignButton();
+        }
+
+        // 更新全选复选框状态
+        function updateSelectAllCheckbox() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const assignableCustomers = filteredCustomers.filter(customer => canAssignCustomer(customer));
+            const allAssignableSelected = assignableCustomers.length > 0 && 
+                assignableCustomers.every(customer => selectedCustomers.has(customer.id));
+            
+            if (allAssignableSelected) {
+                selectAllCheckbox.classList.add('checked');
+            } else {
+                selectAllCheckbox.classList.remove('checked');
+            }
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const availableCount = filteredCustomers.filter(customer => canAssignCustomer(customer)).length;
+            document.getElementById('totalCustomers').textContent = filteredCustomers.length;
+            document.getElementById('availableCustomers').textContent = availableCount;
+            document.getElementById('selectedCustomers').textContent = selectedCustomers.size;
+        }
+
+        // 更新分配按钮状态
+        function updateAssignButton() {
+            const button = document.getElementById('assignButton');
+            const select = document.getElementById('employeeSelect');
+            const canAssign = selectedCustomers.size > 0 && select.value !== '';
+            
+            button.disabled = !canAssign;
+            button.textContent = selectedCustomers.size > 0 ? 
+                `分配 ${selectedCustomers.size} 个客户` : '批量分配客户';
+        }
+
+        // 显示通知
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const text = document.getElementById('notificationText');
+            text.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            // 渲染初始客户列表
+            renderCustomers();
+
+            // 标签筛选
+            document.querySelectorAll('.tag-filter').forEach(filter => {
+                filter.addEventListener('click', function() {
+                    document.querySelectorAll('.tag-filter').forEach(f => f.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.tag;
+                    renderCustomers();
+                });
+            });
+
+            // 员工筛选
+            document.querySelectorAll('[data-employee]').forEach(filter => {
+                filter.addEventListener('click', function() {
+                    document.querySelectorAll('[data-employee]').forEach(f => f.classList.remove('active'));
+                    this.classList.add('active');
+                    currentEmployeeFilter = this.dataset.employee;
+                    renderCustomers();
+                });
+            });
+
+            // 搜索功能
+            document.getElementById('searchInput').addEventListener('input', function() {
+                searchTerm = this.value;
+                renderCustomers();
+            });
+
+            // 员工选择变化
+            document.getElementById('employeeSelect').addEventListener('change', updateAssignButton);
+
+            // 分配按钮点击
+            document.getElementById('assignButton').addEventListener('click', function() {
+                const selectedEmployee = document.getElementById('employeeSelect');
+                if (selectedCustomers.size > 0 && selectedEmployee.value) {
+                    const employeeName = selectedEmployee.options[selectedEmployee.selectedIndex].text;
+                    
+                    // 更新客户分配次数和添加人
+                    customers.forEach(customer => {
+                        if (selectedCustomers.has(customer.id)) {
+                            customer.assignCount += 1;
+                            customer.assignedTo = employeeName;
+                        }
+                    });
+
+                    showNotification(`成功将 ${selectedCustomers.size} 个客户分配给 ${employeeName}`);
+                    
+                    // 清空选择
+                    selectedCustomers.clear();
+                    selectedEmployee.value = '';
+                    renderCustomers();
+                    updateAssignButton();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
